@@ -110,6 +110,8 @@ class ChangePasswordData:
 class PostMessageData:
     message: str
     recipient: str | None
+    lat: float
+    lon: float
 
     def __init__(self, data: dict[str, Any] | None):
         if data == None: return
@@ -122,6 +124,13 @@ class PostMessageData:
             self.recipient = None
 
         self.message = data['message']
+
+        if data.get('coords') != None \
+            and not isinstance(data["coords"].get("lat"), float) \
+            and not isinstance(data["coords"].get("lon"), float):
+            raise missing("coords object need lat and lon fields.")
+        self.lat = data['coords']['lat']
+        self.lon = data['coords']['lon']
 
 def hash_password(plaintext: str) -> str:
     return bcrypt.hashpw(plaintext.encode(), bcrypt.gensalt()).decode()

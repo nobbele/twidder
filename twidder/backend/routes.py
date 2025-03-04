@@ -1,3 +1,4 @@
+import json
 from flask import request
 from twidder import app
 import bcrypt
@@ -5,11 +6,12 @@ from . import database_helper
 from .lib import BadRequestError, ChangePasswordData, ConflictError, ForbiddenError, NotFoundError, PostMessageData, SignInData, SignUpData, UnauthorizedError, check_password, create_token, handle_errors, hash_password, protected, success
 from twidder.websocket.lib import ServerAction
 from twidder.websocket.server_socket import activeConnections
+import requests
 
 @app.route("/sign_in", methods = ['POST'])
 @handle_errors
 def sign_in():
-    """ 
+    """
     HTTP Error Codes:
     500 Bad Request - Missing or invalid data. (Should be validated by client.)
     401 Unauthorized - Invalid credentials.
@@ -28,7 +30,7 @@ def sign_in():
 @app.route("/sign_up", methods = ['POST'])
 @handle_errors
 def sign_up():
-    """ 
+    """
     HTTP Error Codes:
     500 Bad Request - Missing or invalid data. (Should be validated by client.)
     409 Conflict - User already exists.
@@ -42,12 +44,12 @@ def sign_up():
     database_helper.insert_user(data)
 
     return success("Successfully created a new user."), 201
-    
+
 @app.route("/get_user_data_by_token", methods = ['GET'])
 @protected
 @handle_errors
 def get_user_data_by_token():
-    """ 
+    """
     HTTP Error Codes:
     401 Unauthorized - Not logged in or invalid token.
     """
@@ -61,7 +63,7 @@ def get_user_data_by_token():
 @protected
 @handle_errors
 def get_user_data_by_email(email):
-    """ 
+    """
     HTTP Error Codes:
     401 Unauthorized - Not logged in or invalid token.
     404 Not Found - No user with the email found.
@@ -70,12 +72,12 @@ def get_user_data_by_email(email):
     user = database_helper.get_user_by_email(email)
 
     return success("User data retrieved.", user.as_dict()), 200
-    
+
 @app.route("/change_password", methods = ['PUT'])
 @protected
 @handle_errors
 def change_password():
-    """ 
+    """
     HTTP Error Codes:
     500 Bad Request - Missing or invalid data. (Should be validated by client.)
     401 Unauthorized - Not logged in or invalid token.
@@ -95,7 +97,7 @@ def change_password():
 @protected
 @handle_errors
 def post_message():
-    """ 
+    """
     HTTP Error Codes:
     500 Bad Request - Missing or invalid data. (Should be validated by client.)
     401 Unauthorized - Not logged in or invalid token.
@@ -107,12 +109,19 @@ def post_message():
 
     if not database_helper.check_user_exists(data.recipient):
         raise NotFoundError("No such recipient.")
-    
+
     recipientClient = activeConnections.get(data.recipient)
     if (recipientClient != None):
         recipientClient.send(ServerAction.NEW_MESSAGE)
-    
-    database_helper.post_message(email, data.message, data.recipient)
+
+    resp = requests.get(f"https://geocode.xyz/{data.lat},{data.lon}?json=1")
+    resp = json.loads(resp.text)
+
+    region = None
+    if float(resp['standard']['confidence']) > 0.5:
+        region = resp['standard']['region']
+
+    database_helper.post_message(email, data.message, data.recipient, region)
 
     return success("Message posted."), 201
 
@@ -120,7 +129,7 @@ def post_message():
 @protected
 @handle_errors
 def get_user_messages_by_token():
-    """ 
+    """
     HTTP Error Codes:
     401 Unauthorized - Not logged in or invalid token.
     """
@@ -134,7 +143,7 @@ def get_user_messages_by_token():
 @protected
 @handle_errors
 def get_user_messages_by_email(email):
-    """ 
+    """
     HTTP Error Codes:
     401 Unauthorized - Not logged in or invalid token.
     404 Not Found - No user with the email found.
@@ -142,7 +151,7 @@ def get_user_messages_by_email(email):
 
     if not database_helper.check_user_exists(email):
         raise BadRequestError("No such user.")
-    
+
     messages = database_helper.get_user_messages(email)
 
     return success("User messages retrieved.", [message.as_dict() for message in messages]), 200
@@ -150,8 +159,8 @@ def get_user_messages_by_email(email):
 @app.route("/sign_out", methods = ['DELETE'])
 @protected
 @handle_errors
-def sign_out():  
-    """ 
+def sign_out():
+    """
     HTTP Error Codes:
     401 Unauthorized - Not logged in or invalid token.
     """

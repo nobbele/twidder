@@ -65,8 +65,8 @@ class Server {
 
     /**
      * @param {HttpMethod} method
-     * @param {string} url 
-     * @param {Record<string, string | number | undefined>} [body]
+     * @param {string} url body
+     * @param {object} [body]
      * @returns {Promise<{ text: string, status: number }>}
      */
     async httpRequest(method, url, body) {
@@ -141,7 +141,7 @@ class Server {
 
     /**
      * @param {string} endpoint 
-     * @param {Record<string, string | number | undefined>} [params]
+     * @param {object} [params]
      * @param {'POST' | 'DELETE' | 'PUT'} [method]
      * @returns {Promise<any>}
      */
@@ -206,11 +206,12 @@ class Server {
 
     /**
      * @param {string} message
+     * @param {{ lat: number, lon: number }} coords
      * @param {string} [email]
      * @returns {Promise<void>} 
      */
-    postMessage = (message, email) => 
-        this.post("post_message", { message, email }, "POST");
+    postMessage = (message, coords, email) => 
+        this.post("post_message", { message, coords, email }, "POST");
 }
 
 const server = new Server();
