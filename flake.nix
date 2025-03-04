@@ -1,61 +1,125 @@
 {
-  description = "Application packaged using poetry2nix";
+  description = "Hello world flake using uv2nix";
 
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
-    # Last working commit from nixos-small-unstable
-    nixpkgs.url = "github:NixOS/nixpkgs?rev=75e28c029ef2605f9841e0baa335d70065fe7ae2";
-    poetry2nix = {
-      url = "github:nix-community/poetry2nix";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
+    };
+
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, poetry2nix }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        # see https://github.com/nix-community/poetry2nix/tree/master#api for more functions and examples.
-        twidder = { poetry2nix, lib }: poetry2nix.mkPoetryApplication {
-          projectDir = self;
-          overrides = poetry2nix.overrides.withDefaults (final: super:
-            lib.mapAttrs
-              (attr: systems: super.${attr}.overridePythonAttrs
-                (old: {
-                  nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ map (a: final.${a}) systems;
-                }))
-              {
-                # https://github.com/nix-community/poetry2nix/blob/master/docs/edgecases.md#modulenotfounderror-no-module-named-packagename
-                # package = [ "setuptools" ];
-              }
+  outputs =
+    {
+      self,
+      nixpkgs,
+      uv2nix,
+      pyproject-nix,
+      pyproject-build-systems,
+      ...
+    }:
+    let
+      inherit (nixpkgs) lib;
+
+      system = "x86_64-linux";
+
+      workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
+      overlay = workspace.mkPyprojectOverlay {
+        sourcePreference = "wheel";
+      };
+
+      pkgs = nixpkgs.legacyPackages.${system};
+
+      python = pkgs.python312;
+      pythonSet =
+        (pkgs.callPackage pyproject-nix.build.packages {
+          inherit python;
+        }).overrideScope
+          (
+            lib.composeManyExtensions [
+              pyproject-build-systems.overlays.default
+              overlay
+            ]
           );
+
+    in
+    {
+      packages.${system}.default = pythonSet.mkVirtualEnv "twidder-env" workspace.deps.default;
+
+      apps.${system} = {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.default}/bin/hello";
         };
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            poetry2nix.overlays.default
-            (final: _: {
-              twidder = final.callPackage twidder { };
-            })
-          ];
-        };
-      in
-      {
-        packages.default = pkgs.twidder;
-        devShells = {
-          # nix develop
-          # Use this shell for developing your app.
-          default = pkgs.mkShell {
-            inputsFrom = [ pkgs.twidder ];
+      };
+
+      devShells.${system}.default =
+        let
+          editableOverlay = workspace.mkEditablePyprojectOverlay {
+            root = "$REPO_ROOT";
           };
 
-          # nix develop .#poetry
-          # Use this shell for changes to pyproject.toml and poetry.lock.
-          poetry = pkgs.mkShell {
-            packages = [ pkgs.poetry ];
+          editablePythonSet = pythonSet.overrideScope (
+            lib.composeManyExtensions [
+              editableOverlay
+
+              (final: prev: {
+                twidder = prev.twidder.overrideAttrs (old: {
+                  src = lib.fileset.toSource {
+                    root = old.src;
+                    fileset = lib.fileset.unions [
+                      (old.src + "/pyproject.toml")
+                      (old.src + "/twidder")
+                    ];
+                  };
+
+                  nativeBuildInputs =
+                    old.nativeBuildInputs
+                    ++ final.resolveBuildSystem {
+                      editables = [ ];
+                    };
+                });
+
+              })
+            ]
+          );
+
+          virtualenv = editablePythonSet.mkVirtualEnv "twidder-dev-env" workspace.deps.all;
+
+        in
+        pkgs.mkShell {
+          packages = [
+            virtualenv
+            pkgs.uv
+          ];
+
+          env = {
+            UV_NO_SYNC = "1";
+            UV_PYTHON = "${virtualenv}/bin/python";
+            UV_PYTHON_DOWNLOADS = "never";
           };
+
+          shellHook = ''
+            # Undo dependency propagation by nixpkgs.
+            unset PYTHONPATH
+
+            # Get repository root using git. This is expanded at runtime by the editable `.pth` machinery.
+            export REPO_ROOT=$(git rev-parse --show-toplevel)
+          '';
         };
-        legacyPackages = pkgs;
-      }
-    );
+    };
 }

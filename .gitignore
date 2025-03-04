@@ -1,4 +1,5 @@
+__pycache__
 twidder/__pycache__
 twidder/websocket/__pycache__
 twidder/backend/database.db
-.direnv
+.direnvgit

@@ -1,14 +1,18 @@
-[tool.poetry]
+[project]
 name = "twidder"
 version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1",
+    "gunicorn>=23.0",
+    "bcrypt>=3.1",
+    "bcrypt>=4.1",
+    "flask-sock>=0.7",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-flask = "^3.1"
-gunicorn = "^23.0"
-bcrypt = "^4.2"
-flask-sock = "^0.7"
+[project.scripts]
+serve = "start:run"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
