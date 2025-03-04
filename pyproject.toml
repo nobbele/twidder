@@ -5,8 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1",
     "gunicorn>=23.0",
-    "bcrypt>=3.1",
-    "bcrypt>=4.1",
+    "bcrypt>=4.3",
     "flask-sock>=0.7",
 ]
 
