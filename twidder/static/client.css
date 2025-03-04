@@ -1,0 +1,139 @@
+html, #root, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+}
+
+#root {
+    flex: 1;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Actual Styling */
+
+body {
+    background-color: #FFB6C1;
+    font-size: 12px;
+}
+
+input:invalid {
+    border: 1px dashed red;
+}
+
+ol, ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style-type: none;
+}
+
+hr {
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+}
+
+/* Form Style */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    margin: 0;
+}
+
+.form-property {
+    display: flex;
+    flex-direction: row;
+
+    width: 100%;
+}
+
+.form-property input, .form-property select {
+    width: 60%;
+
+    margin-left: auto;
+}
+
+.form-property input {
+    height: 20px;
+}
+
+form input[type="submit"] {
+    width: auto;
+    height: auto;
+
+    margin-left: auto;
+}
+
+.form-message {
+    display: none;
+    color: red;
+}
+
+.form-message.active {
+    display: initial;
+}
+
+/* End of Form Style */
+
+/* Start of Toast Style */
+
+#toast {
+    transition: bottom 0.5s ease-in-out;
+
+    position: fixed;
+    bottom: -64px;
+    left: 0;
+    right: 0;
+    margin: auto;
+
+    width: min-content;
+    height: 64px;
+    padding: 16px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-width: 6px;
+    border-style: solid;
+    border-radius: 32px;
+
+    text-wrap: nowrap;
+    font-size: 18px;
+}
+
+#toast.twoline {
+    height: 96px;
+}
+
+#toast.info {
+    border-color: darkgray;
+    background-color: lightgray;
+    color: black;
+}
+
+#toast.error {
+    border-color: darkred;
+    background-color: red;
+    color: white;
+}
+
+#toast.active {
+    bottom: 64px;
+}
+
+/* End of Toast Style */

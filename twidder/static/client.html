@@ -1,0 +1,172 @@
+<html>
+    <head>
+        <link href="client.css" type="text/css" rel="stylesheet">
+        <link href="welcome.css" type="text/css" rel="stylesheet">
+        <link href="profile.css" type="text/css" rel="stylesheet">
+        <script src="welcome.js" type="text/javascript"></script>
+        <script src="profile.js" type="text/javascript"></script>
+        <script src="client.js" type="text/javascript"></script>
+        <script src="server.js" type="text/javascript"></script>
+        <script src="socketclient.js" type="text/javascript"></script>
+
+        <script type=”text/view” id="welcome-view">
+            <div id="welcome-container">
+                <section id="logo">
+                    <img src="wimage.png" />
+                </section>
+                <section id="login">
+                    <form id="login-form">
+                        <div class="form-property">
+                            <label for="login-email">Email:</label>
+                            <input type="email" id="login-email" name="login-email" required>
+                        </div>
+                        <div class="form-property">
+                            <label for="login-password">Password:</label>
+                            <input type="password" id="login-password" name="login-password" required>
+                        </div>
+
+                        <span class="form-message"></span>
+    
+                        <input type="submit" value="Login">
+                    </form>
+                </section>
+                <section id="signup">
+                    <h2>Sign up here!</h2>
+                    <form id="signup-form">
+                        <div class="form-property">
+                            <label for="firstname">First Name:</label>
+                            <input type="text" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="form-property">
+                            <label for="familyname">Family Name:</label>
+                            <input type="text" id="familyname" name="familyname" required>
+                        </div>
+                        <div class="form-property">
+                            <label for="gender">Gender:</label>
+                            <select id="gender" name="gender">
+                                <option value="unspecified">Unspecified</option>
+                                <option value="female">Female</option>
+                                <option value="male">Male</option>
+                                <option value="nonbinary">Non-binary</option>
+                            </select>
+                        </div>
+                        <div class="form-property">
+                            <label for="city">City:</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-property">
+                            <label for="country">Country:</label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+    
+                        <div class="form-property">
+                            <label for="signup-email">Email:</label>
+                            <input type="email" id="signup-email" name="signup-email" required>
+                        </div>
+                        <div class="form-property">
+                            <label for="signup-password">Password:</label>
+                            <input type="password" id="signup-password" name="signup-password" minlength="3" required>
+                        </div>
+                        <div class="form-property">
+                            <label for="repeat-password">Repeat PSW:</label>
+                            <input type="password" id="repeat-password" name="repeat-password" required>
+                        </div>
+
+                        <span class="form-message"></span>
+    
+                        <input type="submit" value="Sign up">
+                    </form>
+                </section>
+            </div>
+        </script>
+        <script type=”text/view” id="profile-view">
+            <div id="profile-container">
+                <nav id="navbar">
+                    <ol id="navbar-list">
+                        <li class="navbar-entry" id="nav-home">
+                            <button>Home</button>
+                        </li>
+                        <li class="navbar-entry" id="nav-browse">
+                            <button>Browse</button>
+                        </li>
+                        <li class="navbar-entry" id="nav-account">
+                            <button>Account</button>
+                        </li>
+                    </ol>
+                </nav>
+                <hr />
+                <main id="profile-root">
+                    <section id="home-section">
+                        <h1>Home</h1>
+                        <hr />
+                        <div id="home-section-wrapper">
+                            <section id="user-details">
+                                <h2>User Details</h2>
+                                <ul>
+                                    <li id="details-email"></li>
+                                    <li id="details-firstname"></li>
+                                    <li id="details-familyname"></li>
+                                    <li id="details-gender"></li>
+                                    <li id="details-city"></li>
+                                    <li id="details-country"></li>
+                                </ul>
+                            </section>
+                            <section id="message-wall">
+                                <button id="message-wall-refresh">Refresh</button>
+                                <ol id="wall-message-list"></ol>
+                                <form id="message-form">
+                                    <input type="text" id="message-form-content" name="message-form-content" minlength="3" required />
+                                    <span class="form-message"></span>
+                                    <input type="submit" value="Post" />
+                                </form>
+                            </section>
+                        </div>
+                    </section>
+                    <section id="browse-section">
+                        <h1>Browse</h1>
+                        <form id="browse-form">
+                            <div class="form-property">
+                                <label for="browse-email">Email:</label>
+                                <input type="email" id="browse-email" name="browse-email" />
+                            </div>
+
+                            <span class="form-message"></span>
+
+                            <input type="submit" value="View" />
+                        </form>
+                    </section>
+                    <section id="account-section">
+                        <h1>Account</h1>
+                        <form id="change-password-form">
+                            <div class="form-property">
+                                <label for="old-password">Old Password:</label>
+                                <input type="password" id="old-password" name="old-password" required />
+                            </div>
+                            <div class="form-property">
+                                <label for="new-password">New Password:</label>
+                                <input type="password" id="new-password" name="new-password" minlength="3" required />
+                            </div>
+                            <div class="form-property">
+                                <label for="repeat-new-password">Repeat New Password:</label>
+                                <input type="password" id="repeat-new-password" name="repeat-new-password" required />
+                            </div>
+
+                            <span class="form-message"></span>
+
+                            <input type="submit" value="Change" />
+                        </form>
+                        <hr />
+                        <button id="logout">Log out</button>
+                    </section>
+                </main>
+            </div>
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <div id="toast" class="">
+            <span id="toast-text"></span>
+        </div>
+    </body>
+</html>

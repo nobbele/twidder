@@ -1,0 +1,45 @@
+#welcome-container {
+    display: grid;
+    grid-template-columns: 340px 250px;
+    grid-template-rows: 100px 300px;
+    grid-template-areas: 
+        "logo login"
+        "logo signup";
+    gap: 10px;
+
+    width: 600px;
+    height: 400px;
+
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#logo, #login, #signup {
+    background-color: white;
+}
+
+#login, #signup {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+}
+
+#logo {
+    grid-area: logo;
+}
+
+#logo > img {
+    display: block;
+    margin: auto;
+}
+
+#login {
+    grid-area: login;
+}
+
+#signup {
+    grid-area: signup;
+}
